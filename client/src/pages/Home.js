@@ -9,7 +9,7 @@ export default function Home() {
 
   useEffect(() => {
     axios
-      .get('http://localhost:5001/api/posts', {
+      .get('https://blog-mern-6as8.onrender.com/api/posts', {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       })
       .then(res => {
