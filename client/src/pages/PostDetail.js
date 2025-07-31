@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+
+
 import axios from 'axios';
-import { useParams, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 
 export default function PostDetail() {
   const { id } = useParams();
@@ -8,7 +10,7 @@ export default function PostDetail() {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    axios.get('call the api here', {
+    axios.get('http://localhost:5000/api/posts', {  
       headers: token ? { Authorization: `Bearer ${token}` } : {}
     })
     .then(res => {
@@ -22,9 +24,9 @@ export default function PostDetail() {
 
   return (
     <div className="card mb-4 shadow-sm">
-      {post.imagePath && 
-
-}`}
+      {post.imagePath && (
+        <img
+          src={post.imagePath}
           className="card-img-top"
           alt={post.title}
         />

@@ -1,122 +1,97 @@
-// client/src/pages/Home.js
-import React, { useEffect, useState } from 'react'
-import axios from 'axios'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
+import './Home.css'
 
 export default function Home() {
-  const [posts, setPosts] = useState([])
-  const token = localStorage.getItem('token')
+  const [posts, setPosts] = useState([]);
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     axios
-      .get('', {
+      .get('http://localhost:5001/api/posts', {
         headers: token ? { Authorization: `Bearer ${token}` } : {}
       })
-      .then(res => setPosts(res.data))
-      .catch(console.error)
-  }, [token])
+      .then(res => {
+        setPosts(Array.isArray(res.data) ? res.data : res.data.posts || []);
+      })
+      .catch(err => {
+        console.error('Failed to fetch posts:', err);
+        setPosts([]);
+      });
+  }, [token]);
 
-  const handleDelete = async id => {
-    if (!window.confirm('Delete this post?')) return
-    await axios.delete(`http://localhost:5001/api/posts/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    setPosts(p => p.filter())
-  }
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this post?')) return;
+    try {
+      await axios.delete(`http://localhost:5001/api/posts/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPosts(prev => prev.filter(p => p._id !== id));
+    } catch (err) {
+      console.error('Delete failed:', err);
+    }
+  };
 
   return (
-    <div
-      style={{
-        maxWidth: 1200,
-        margin: '0 auto',
-        padding: '2rem',
-        fontFamily: 'sans-serif',
-        background: '#f0f2f5'
-      }}
-    >
-      <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        {token ? 'My Posts' : 'All Posts'}
-      </h1>
+    <div style={{ }}>
+      <div className="px-4">
+        <h2 className="text-center fw-bold mb-5" style={{
+          fontSize: '2.5rem',
+          textDecoration: 'underline',
+          color: '#2f3542',
+          textShadow: '1px 1px 2px rgba(0,0,0,0.2)'
+        }}>
+          {token ? 'My Posts' : 'All Posts'}
+        </h2>
 
-      {/* Grid Container */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '1.5rem'
-        }}
-      >
-        {posts.map(p => (
-          <div
-            key={p._id}
-            style={{
-              background: '#fff',
-              borderRadius: '8px',
-              overflow: 'hidden',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              display: 'flex',
-              flexDirection: 'column'
-            }}
-          >
-            {p.imagePath && (
-              <img
-                src={`http://______fill in the blank______/uploads/${p.imagePath}`}
-                alt={p.title}
-                style={{ width: '100%', height: 180, objectFit: 'cover' }}
-              />
-            )}
-            <div style={{ padding: '1rem', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-              <h3 style={{ margin: '0 0 0.5rem', fontSize: '1.25rem' }}>{p.title}</h3>
-              <p style={{ color: '#555', flexGrow: 1 }}>
-                {p.content.length > 100 ? p.content.slice(0,100) + '…' : p.content}
-              </p>
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem' }}>
-                <Link
-                  to={`/post/${p._id}`}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '4px',
-                    textDecoration: 'none',
-                    border: '1px solid #007bff',
-                    color: '#007bff'
-                  }}
-                >
-                  Read More
-                </Link>
-                {token && (
-                  <>
-                    <Link
-                      to={`/edit/${p._id}`}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        borderRadius: '4px',
-                        textDecoration: 'none',
-                        border: '1px solid #6c757d',
-                        color: '#6c757d'
-                      }}
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(p._id)}
-                      style={{
-                        padding: '0.5rem 1rem',
-                        borderRadius: '4px',
-                        border: '1px solid #dc3545',
-                        background: 'transparent',
-                        color: '#dc3545',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </>
+        <div className="row">
+          {posts.map(post => (
+            <div className="col-md-4 mb-4" key={post._id}>
+              <div className="card h-100 shadow-sm border-0" style={{ transition: 'transform 0.2s' }}>
+                {post.imagePath && (
+                  <img
+                    src={`http://localhost:5001/uploads/${post.imagePath}`}
+                    className="card-img-top"
+                    alt={post.title}
+                    style={{ height: '200px', objectFit: 'cover' }}
+                  />
                 )}
+                <div className="card-body d-flex flex-column">
+                  <h5 className="card-title">{post.title}</h5>
+                  <p className="card-text text-muted" style={{ flexGrow: 1 }}>
+                    {post.content.length > 100
+                      ? post.content.slice(0, 100) + '…'
+                      : post.content}
+                  </p>
+                  <div className="d-flex justify-content-between mt-3">
+                    <Link to={`/post/${post._id}`} className="btn btn-primary btn-sm">
+                      Read More
+                    </Link>
+                    {token && (
+                      <div className="d-flex gap-2">
+                        <Link to={`/edit/${post._id}`} className="btn btn-secondary btn-sm">
+                          Edit
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(post._id)}
+                          className="btn btn-outline-danger btn-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+
+          {posts.length === 0 && (
+            <div className="text-center text-muted mt-5">No posts found.</div>
+          )}
+        </div>
       </div>
     </div>
-  )
+  );
 }
