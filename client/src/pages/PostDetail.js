@@ -1,5 +1,3 @@
-
-
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -10,14 +8,15 @@ export default function PostDetail() {
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/posts', {  
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    })
-    .then(res => {
-      const found = res.data.find(p => p._id === id);
-      setPost(found);
-    })
-    .catch(console.error);
+    axios
+      .get(`${process.env.REACT_APP_API_BASE_URL}/api/posts`, { 
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      })
+      .then(res => {
+        const found = res.data.find(p => p._id === id);
+        setPost(found);
+      })
+      .catch(console.error);
   }, [id, token]);
 
   if (!post) return <p>Loading…</p>;
@@ -26,7 +25,7 @@ export default function PostDetail() {
     <div className="card mb-4 shadow-sm">
       {post.imagePath && (
         <img
-          src={post.imagePath}
+          src={`${process.env.REACT_APP_API_BASE_URL}/uploads/${post.imagePath}`}
           className="card-img-top"
           alt={post.title}
         />

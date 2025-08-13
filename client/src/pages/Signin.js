@@ -10,7 +10,11 @@ export default function Signin() {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      const { data } = await axios.post('http://localhost:5001/api/auth/signin', { email, password });
+      const { data } = await axios.post(
+  `${process.env.REACT_APP_API_BASE_URL}/api/auth/signin`,
+  { email, password }
+);
+
       localStorage.setItem('token', data.token);
       localStorage.setItem('name', data.name);
       localStorage.setItem('email', data.email);

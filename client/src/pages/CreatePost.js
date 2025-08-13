@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -18,19 +17,20 @@ export default function CreatePost() {
   useEffect(() => {
     if (isEdit) {
       const token = localStorage.getItem('token');
-      axios.get(`http://localhost:5001/api/posts`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      .then(res => {
-        const post = res.data.find(p => p._id === id);
-        if (post) {
-          setTitle(post.title);
-          setContent(post.content);
-          setCategory(post.category);
-          setStatus(post.status);
-        }
-      })
-      .catch(console.error);
+      axios
+        .get(`${process.env.REACT_APP_API_BASE_URL}/api/posts`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => {
+          const post = res.data.find(p => p._id === id);
+          if (post) {
+            setTitle(post.title);
+            setContent(post.content);
+            setCategory(post.category);
+            setStatus(post.status);
+          }
+        })
+        .catch(console.error);
     }
   }, [isEdit, id]);
 
@@ -46,15 +46,17 @@ export default function CreatePost() {
 
     try {
       const url = isEdit
-        ? `http://localhost:5001/api/posts/${id}`
-        : 'http://localhost:5001/api/posts';
+        ? `${process.env.REACT_APP_API_BASE_URL}/api/posts/${id}`
+        : `${process.env.REACT_APP_API_BASE_URL}/api/posts`;
       const method = isEdit ? 'put' : 'post';
+
       await axios[method](url, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'
         }
       });
+
       navigate('/');
     } catch (err) {
       alert(err?.response?.data?.error || 'Submission failed');
